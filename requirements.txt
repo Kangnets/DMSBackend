@@ -13,6 +13,7 @@ anaconda-navigator @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000
 anaconda-project @ file:///Users/cbousseau/work/recipes/ci_py311/anaconda-project_1677964558977/work
 anyio @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a17a7759g2/croot/anyio_1706220182417/work
 appdirs==1.4.4
+Flask==2.3.3
 applaunchservices @ file:///Users/cbousseau/work/recipes/ci_py311/applaunchservices_1677955996025/work
 appnope @ file:///Users/cbousseau/work/recipes/ci_py311/appnope_1677917710869/work
 appscript @ file:///Users/cbousseau/work/recipes/ci_py311/appscript_1677956964648/work
@@ -112,8 +113,6 @@ greenlet @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_5
 grpcio==1.64.1
 h11==0.14.0
 h5py==3.11.0
-gunicorn==23.0.0
-Flask==2.3.3
 HeapDict @ file:///Users/ktietz/demo/mc3/conda-bld/heapdict_1630598515714/work
 holoviews @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_e2ffhlmgnd/croot/holoviews_1707836458582/work
 hvplot @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a5ty3nz7ng/croot/hvplot_1706712400461/work
