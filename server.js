@@ -53,7 +53,7 @@ app.post("/sentiment/analysis", async (req, res) => {
 // Function to call the Python script and analyze sentiment
 const analyzeSentiment = (text) => {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("python3", ["index.py", text]);
+    const pythonProcess = spawn("python3", ["ai/index.py", text]);
 
     let output = "";
     let error = "";
