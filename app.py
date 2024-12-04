@@ -10,7 +10,7 @@ executor = ThreadPoolExecutor(max_workers=4)
 def analyze_sentiment(text):
     try:
         process = subprocess.Popen(
-            ["python3", "/absolute/path/to/index.py", text],
+            ["python3", "index.py", text],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
