@@ -8,7 +8,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 
 # Preload model and tokenizer
-DATA_CONFIGS = 'data_configs.json'
+DATA_CONFIGS = './ai/CLEAN_DATA/data_configs.json'
 prepro_configs = json.load(open(DATA_CONFIGS, 'r'))
 tokenizer = tf.keras.preprocessing.text.Tokenizer()
 tokenizer.fit_on_texts(prepro_configs['vocab'])
@@ -46,7 +46,7 @@ kargs = {
     'output_dimension': 1,
 }
 model = CNNClassifier(**kargs)
-model.load_weights('../DATA_OUT/cnn_classifier_kr/weights.weights.h5')
+model.load_weights('./ai/DATA_OUT/cnn_classifier_kr/weights.weights.h5')
 
 # Text preprocessing and sentiment analysis
 def analyze_sentiment(sentence):

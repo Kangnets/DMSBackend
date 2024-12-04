@@ -47,7 +47,7 @@ def analyze_sentiment(text):
     try:
         # Execute the external Python script
         process = subprocess.Popen(
-            ["python3", "ai/index.py", text],
+            ["python3", "index.py", text],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
