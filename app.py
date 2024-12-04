@@ -20,7 +20,7 @@ def analyze_sentiment(text):
         if not text or not isinstance(text, str) or len(text.strip()) == 0:
             raise ValueError("Invalid text input: Text must be a non-empty string.")
         
-        print(f"Analyzing text: {text}")  # 디버깅 로그
+        print(f"Analyzing text: {text[:50]}...")  # 디버깅 로그 (50자만 출력)
 
         # Subprocess 실행
         process = subprocess.Popen(
@@ -28,7 +28,7 @@ def analyze_sentiment(text):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate(timeout=60)  # 타임아웃 증가 (60초)
+        stdout, stderr = process.communicate(timeout=120)  # 타임아웃 증가 (120초)
 
         if process.returncode != 0:
             error_message = stderr.decode('utf-8').strip()
@@ -41,11 +41,9 @@ def analyze_sentiment(text):
 
     except subprocess.TimeoutExpired:
         process.kill()
-        print(f"Timeout for text: {text}")  # 디버깅 로그
-        raise Exception(f"Subprocess timed out for input: {text}")
-    except Exception as e:
-        print(f"Error analyzing sentiment for text: {text}, Error: {e}")  # 디버깅 로그
-        raise Exception(f"Error analyzing sentiment for input: {text}, Error: {e}")
+        print(f"Timeout for text: {text[:50]}...")  # 디버깅 로그
+        raise Exception(f"Subprocess timed out for input: {text[:50]}...")
+
 
 @app.route('/sentiment/analysis', methods=['POST'])
 def sentiment_analysis():
