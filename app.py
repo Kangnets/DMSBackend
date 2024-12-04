@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# ThreadPoolExecutor 생성 (최대 4개의 병렬 작업 허용)
-executor = ThreadPoolExecutor(max_workers=4)
+# ThreadPoolExecutor 생성 (최대 2개의 병렬 작업 허용)
+executor = ThreadPoolExecutor(max_workers=2)
 
 # 최대 텍스트 수 및 텍스트 길이 제한
 MAX_TEXT_COUNT = 100
@@ -16,22 +16,35 @@ def analyze_sentiment(text):
     Subprocess를 통해 텍스트의 감정을 분석하는 함수.
     """
     try:
+        # 입력 텍스트 검증
+        if not text or not isinstance(text, str) or len(text.strip()) == 0:
+            raise ValueError("Invalid text input: Text must be a non-empty string.")
+        
+        print(f"Analyzing text: {text}")  # 디버깅 로그
+
+        # Subprocess 실행
         process = subprocess.Popen(
             ["python3", "index.py", text],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate(timeout=30)  # 타임아웃 증가 (30초)
+        stdout, stderr = process.communicate(timeout=60)  # 타임아웃 증가 (60초)
 
         if process.returncode != 0:
             error_message = stderr.decode('utf-8').strip()
+            print(f"Subprocess error: {error_message}")  # 디버깅 로그
             raise Exception(f"Error in subprocess: {error_message}")
 
-        return stdout.decode('utf-8').strip()
+        result = stdout.decode('utf-8').strip()
+        print(f"Analysis result: {result}")  # 디버깅 로그
+        return result
+
     except subprocess.TimeoutExpired:
         process.kill()
+        print(f"Timeout for text: {text}")  # 디버깅 로그
         raise Exception(f"Subprocess timed out for input: {text}")
     except Exception as e:
+        print(f"Error analyzing sentiment for text: {text}, Error: {e}")  # 디버깅 로그
         raise Exception(f"Error analyzing sentiment for input: {text}, Error: {e}")
 
 @app.route('/sentiment/analysis', methods=['POST'])
@@ -61,12 +74,13 @@ def sentiment_analysis():
         for future in futures:
             text = futures[future]
             try:
-                result = future.result(timeout=30)  # 타임아웃 증가 (30초)
+                result = future.result(timeout=60)  # 타임아웃 증가 (60초)
                 results.append(result)
             except Exception as e:
                 print(f"Error processing text: {text}, Error: {e}")
                 results.append("error")
 
+        # 결과 집계
         positive_count = sum(1 for r in results if r == "positive")
         negative_count = sum(1 for r in results if r == "negative")
         error_count = sum(1 for r in results if r == "error")
@@ -85,7 +99,7 @@ def sentiment_analysis():
         })
 
     except Exception as e:
-        print(f"Error in /sentiment/analysis: {e}")
+        print(f"Error in /sentiment/analysis: {e}")  # 디버깅 로그
         return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
