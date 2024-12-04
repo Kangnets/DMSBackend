@@ -11,21 +11,23 @@ def sentiment_analysis():
         data = request.get_json()
         texts = data.get('texts', [])
 
-        if not isinstance(texts, list) or len(texts) == 0:
+        if not texts or not isinstance(texts, list):
             return jsonify({"error": "Invalid request: texts must be a non-empty array."}), 400
 
-        positive_count = 0
-        negative_count = 0
-
-        # Analyze each text
+        results = []
         for text in texts:
-            result = analyze_sentiment(text)
-            if result == "positive":
-                positive_count += 1
-            else:
-                negative_count += 1
+            try:
+                result = analyze_sentiment(text)
+                results.append(result)
+            except Exception as e:
+                print(f"Error processing text: {text}, Error: {e}")
+                results.append("error")
 
-        total = len(texts)
+        # Calculate statistics
+        positive_count = results.count("positive")
+        negative_count = results.count("negative")
+        total = len(results)
+
         positive_ratio = round((positive_count / total) * 100, 2)
         negative_ratio = round((negative_count / total) * 100, 2)
 
@@ -47,20 +49,27 @@ def analyze_sentiment(text):
     try:
         # Execute the external Python script
         process = subprocess.Popen(
-            ["python3", "index.py", text],
+            ["python3", "./index.py", text],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate(timeout=10)
+        try:
+            stdout, stderr = process.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            raise Exception("Subprocess timed out")
 
         if process.returncode != 0:
-            raise Exception(stderr.decode('utf-8'))
+            error_message = stderr.decode('utf-8').strip()
+            raise Exception(f"External script error: {error_message}")
 
         # Return the trimmed result from the script
         return stdout.decode('utf-8').strip()
 
     except Exception as e:
-        raise Exception(f"Error analyzing sentiment: {e}")
+        print(f"Error analyzing sentiment for text '{text}': {e}")
+        raise
 
 
 if __name__ == '__main__':
