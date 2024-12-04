@@ -51,7 +51,7 @@ def analyze_sentiment(text):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate()
+        stdout, stderr = process.communicate(timeout=10)
 
         if process.returncode != 0:
             raise Exception(stderr.decode('utf-8'))
