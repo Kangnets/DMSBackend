@@ -7,8 +7,9 @@ app = Flask(__name__)
 # ThreadPoolExecutor 생성 (최대 4개의 병렬 작업 허용)
 executor = ThreadPoolExecutor(max_workers=4)
 
-# 최대 텍스트 수 제한
+# 최대 텍스트 수 및 텍스트 길이 제한
 MAX_TEXT_COUNT = 100
+MAX_TEXT_LENGTH = 500  # 텍스트 길이 제한 (500자)
 
 def analyze_sentiment(text):
     """
@@ -49,6 +50,10 @@ def sentiment_analysis():
         # 최대 텍스트 수 제한
         if len(texts) > MAX_TEXT_COUNT:
             return jsonify({"error": f"Too many texts. The maximum allowed is {MAX_TEXT_COUNT}."}), 400
+
+        # 텍스트 길이 제한 검증
+        if any(len(text) > MAX_TEXT_LENGTH for text in texts):
+            return jsonify({"error": f"One or more texts exceed the maximum allowed length of {MAX_TEXT_LENGTH} characters."}), 400
 
         # 병렬로 텍스트 처리
         results = []
