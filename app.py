@@ -14,7 +14,7 @@ def analyze_sentiment(text):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        stdout, stderr = process.communicate(timeout=5)  # 타임아웃 5초로 줄임
+        stdout, stderr = process.communicate(timeout=20)  # 타임아웃 20초
 
         if process.returncode != 0:
             error_message = stderr.decode('utf-8').strip()
