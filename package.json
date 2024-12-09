@@ -9,7 +9,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@huggingface/inference": "2.8.1",
     "express": "4.21.1",
-    "keras": "1.0.1"
+    "keras": "1.0.1",
+    "natural": "8.0.1",
+    "node-fetch": "2.6.1"
   }
 }
