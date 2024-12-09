@@ -3,6 +3,7 @@ const { HfInference } = require("@huggingface/inference");
 
 // Hugging Face Inference API instance
 const hf = new HfInference("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"); // Replace with your Hugging Face API Key
+
 // Load the JSON reference file
 const sentimentReference = {
   진보: {
@@ -100,7 +101,6 @@ const sentimentReference = {
     조선일보: "Positive",
     동아일보: "Positive",
     서울신문: "Positive",
-    조선일보: "Positive",
     한겨레: "Negative",
     KBS: "Negative",
     MBC: "Negative",
@@ -150,6 +150,14 @@ const analyzeSentiment = async (text) => {
   }
 };
 
+// Helper function to map star ratings to sentiment
+const mapStarToSentiment = (starRating) => {
+  const rating = parseInt(starRating[0]); // Extract the first character as an integer
+  if (rating >= 4) return "Positive";
+  if (rating <= 2) return "Negative";
+  return "Neutral";
+};
+
 // Endpoint to handle sentiment analysis
 app.post("/sentiment/analysis", async (req, res) => {
   const videoData = req.body.data;
@@ -174,7 +182,8 @@ app.post("/sentiment/analysis", async (req, res) => {
 
     for (const comment of comments) {
       // Perform sentiment analysis
-      const sentiment = await analyzeSentiment(comment);
+      const sentimentResult = await analyzeSentiment(comment);
+      const sentiment = mapStarToSentiment(sentimentResult);
 
       // Extract keywords
       const keywords = Object.keys(sentimentReference["진보"]).concat(
@@ -192,6 +201,13 @@ app.post("/sentiment/analysis", async (req, res) => {
         sentimentResults[keyword] = sentiment;
         categoryCount[sentimentType] += 1;
       });
+
+      // Debugging logs
+      console.log("Comment:", comment);
+      console.log("Sentiment Result:", sentimentResult);
+      console.log("Mapped Sentiment:", sentiment);
+      console.log("Matched Keywords:", matchedKeywords);
+      console.log("Category Count:", categoryCount);
     }
   }
 
