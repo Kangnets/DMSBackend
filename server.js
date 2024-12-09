@@ -3,7 +3,6 @@ const { HfInference } = require("@huggingface/inference");
 
 // Hugging Face Inference API instance
 const hf = new HfInference("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"); // Replace with your Hugging Face API Key
-
 // Load the JSON reference file
 const sentimentReference = {
   진보: {
@@ -130,6 +129,7 @@ const sentimentReference = {
     종교의자유: "Positive",
   },
 };
+
 const app = express();
 const PORT = 3000;
 
@@ -140,7 +140,7 @@ app.use(express.json());
 const analyzeSentiment = async (text) => {
   try {
     const result = await hf.textClassification({
-      model: "distilbert-base-uncased-finetuned-sst-2-english",
+      model: "nlptown/bert-base-multilingual-uncased-sentiment", // Updated to a Korean-compatible model
       inputs: text,
     });
     return result[0]?.label || "Neutral";
@@ -186,8 +186,9 @@ app.post("/sentiment/analysis", async (req, res) => {
       );
 
       matchedKeywords.forEach((keyword) => {
-        const sentimentType =
-          sentimentReference["진보"][keyword] === sentiment ? "진보" : "보수";
+        const isProgressive = sentimentReference["진보"][keyword] === sentiment;
+        const sentimentType = isProgressive ? "진보" : "보수";
+
         sentimentResults[keyword] = sentiment;
         categoryCount[sentimentType] += 1;
       });
