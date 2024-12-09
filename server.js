@@ -1,6 +1,5 @@
 const express = require("express");
 const { HfInference } = require("@huggingface/inference");
-const fs = require("fs");
 
 // Hugging Face Inference API instance
 const hf = new HfInference("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"); // Replace with your Hugging Face API Key
@@ -131,7 +130,6 @@ const sentimentReference = {
     종교의자유: "Positive",
   },
 };
-
 const app = express();
 const PORT = 3000;
 
@@ -154,44 +152,56 @@ const analyzeSentiment = async (text) => {
 
 // Endpoint to handle sentiment analysis
 app.post("/sentiment/analysis", async (req, res) => {
-  const sentences = req.body.sentences;
+  const videoData = req.body.data;
 
-  if (!Array.isArray(sentences) || sentences.length === 0) {
+  if (!Array.isArray(videoData) || videoData.length === 0) {
     return res.status(400).json({
-      error: "Invalid request. 'sentences' should be a non-empty array.",
+      error: "Invalid request. 'data' should be a non-empty array.",
     });
   }
 
   const sentimentResults = {};
   const categoryCount = { 진보: 0, 보수: 0 };
 
-  for (const sentence of sentences) {
-    // Perform sentiment analysis
-    const sentiment = await analyzeSentiment(sentence);
+  // Process each video and its comments
+  for (const video of videoData) {
+    const { video: videoTitle, comments } = video;
 
-    // Extract nouns (simple keyword matching for now)
-    const keywords = Object.keys(sentimentReference["진보"]).concat(
-      Object.keys(sentimentReference["보수"])
-    );
+    if (!videoTitle || !Array.isArray(comments)) {
+      console.warn(`Invalid video data format for: ${videoTitle}`);
+      continue;
+    }
 
-    const matchedKeywords = keywords.filter((keyword) =>
-      sentence.includes(keyword)
-    );
+    for (const comment of comments) {
+      // Perform sentiment analysis
+      const sentiment = await analyzeSentiment(comment);
 
-    matchedKeywords.forEach((keyword) => {
-      const sentimentType =
-        sentimentReference["진보"][keyword] === sentiment ? "진보" : "보수";
-      sentimentResults[keyword] = sentiment;
-      categoryCount[sentimentType] += 1;
-    });
+      // Extract keywords
+      const keywords = Object.keys(sentimentReference["진보"]).concat(
+        Object.keys(sentimentReference["보수"])
+      );
+
+      const matchedKeywords = keywords.filter((keyword) =>
+        comment.includes(keyword)
+      );
+
+      matchedKeywords.forEach((keyword) => {
+        const sentimentType =
+          sentimentReference["진보"][keyword] === sentiment ? "진보" : "보수";
+        sentimentResults[keyword] = sentiment;
+        categoryCount[sentimentType] += 1;
+      });
+    }
   }
 
   // Calculate percentages
   const totalKeywords = categoryCount["진보"] + categoryCount["보수"];
-  const percentages = {
-    진보: ((categoryCount["진보"] / totalKeywords) * 100).toFixed(2),
-    보수: ((categoryCount["보수"] / totalKeywords) * 100).toFixed(2),
-  };
+  const percentages = totalKeywords
+    ? {
+        진보: ((categoryCount["진보"] / totalKeywords) * 100).toFixed(2),
+        보수: ((categoryCount["보수"] / totalKeywords) * 100).toFixed(2),
+      }
+    : { 진보: "0.00", 보수: "0.00" };
 
   // Respond with results
   res.json({ percentages, sentimentResults });
